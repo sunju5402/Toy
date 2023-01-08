@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Slf4j
 @Configuration
@@ -52,11 +53,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.and()
 				.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-//		http.formLogin() // 로그인페이지 설정
-//			.loginPage("/login")
-//			.failureHandler(getFailureHandler())
-//			.permitAll();
-
+		http.logout() // 로그아웃 페이지 설정
+			.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+			.logoutSuccessUrl("/")
+			.invalidateHttpSession(true); // session 초기화
 	}
 
 	// spring boot 2.x

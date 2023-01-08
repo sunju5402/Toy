@@ -36,12 +36,15 @@ public class MemberDto {
 			message = "비밀번호는 8~16자이고, 적어도 영문 대 or 소문자, 숫자, 특수문자를 한 개 이상 입력하세요.")
 		private String password;
 		@NotBlank(message = "필수 입력입니다.")
-		private String address;
+		private String zipcode;
+		@NotBlank(message = "필수 입력입니다.")
+		private String address1;
+		private String address2;
 		@NotBlank(message = "필수 입력입니다.")
 		@Pattern(regexp = "^\\d{2,3}-\\d{3,4}-\\d{4}$",message = "전화번호 양식과 맞지 않습니다. "
 			+ "xx(x)-xxx(x)-xxxx")
 		private String phone;
-		// primitive boolean 타입이 is로 시작할때 is를 생략하고 json에서 넘어와 제대로  변환되지 않음.
+		// primitive boolean 타입이 is로 시작할때 is를 생략하고 json에서 넘어와 제대로 변환되지 않음.
 		// Boolean 래퍼 타입으로 바꿔줘도 매핑됨.
 		@JsonProperty("isAdmin")
 		private boolean isAdmin;
@@ -55,7 +58,9 @@ public class MemberDto {
 				.name(name)
 				.nickname(nickname)
 				.password(password)
-				.address(address)
+				.zipcode(zipcode)
+				.address1(address1)
+				.address2(address2)
 				.phone(phone)
 				.isAdmin(isAdmin)
 				.status(MemberStatus.REQ)

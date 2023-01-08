@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
+// error 발생 시, custom response로 반환
 public class GlobalExceptionHandler {
 	@ExceptionHandler(AuthenticationException.class)
 	public ErrorResponse handleEmailException(AuthenticationException e) {
@@ -20,6 +21,14 @@ public class GlobalExceptionHandler {
 		return new ErrorResponse(
 			ErrorCode.MEMBER_NOT_FOUND,
 			ErrorCode.MEMBER_NOT_FOUND.getDescription()
+		);
+	}
+
+	@ExceptionHandler(ApiRequestException.class)
+	public ErrorResponse handleUsernameException(ApiRequestException e) {
+		return new ErrorResponse(
+			ErrorCode.API_REQUEST_FAIL,
+			ErrorCode.API_REQUEST_FAIL.getDescription()
 		);
 	}
 }

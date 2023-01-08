@@ -6,11 +6,9 @@ import com.example.toyservice.model.ServiceResult;
 import com.example.toyservice.model.entity.Member;
 import com.example.toyservice.security.TokenProvider;
 import com.example.toyservice.service.MemberService;
-import java.security.Principal;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,26 +24,28 @@ public class MemberController {
 	private final MemberService memberService;
 	private final TokenProvider tokenProvider;
 
-
+	/**
+	 * javascript로 회원가입 버튼 누를 시, 현재 위치에 대한 위도와 경도 parameter로 담아서 주소 요청
+	 */
 	@PostMapping("/signup")
 	public ResponseEntity<?> signup(@Valid @RequestBody MemberDto.Request request
-									, Errors errors) {
+		, @RequestParam("x") String x
+		, @RequestParam("y") String y
+		, Errors errors) {
 		if (errors.hasFieldErrors()) {
 			return ResponseEntity.ok(memberService.validate(errors));
 		}
 
-		ServiceResult result = memberService.register(request);
+		ServiceResult result = memberService.register(x, y, request);
 
 		return ResponseEntity.ok(
 			new ResponseResult(result.isResult(), result.getMessage()));
 	}
 
 	@GetMapping("/email-auth")
-	public ResponseEntity<?> emailAuth(Model model, @RequestParam String id) {
+	public ResponseEntity<?> emailAuth(@RequestParam String id) {
 		String uuid = id;
-
 		ServiceResult result = memberService.emailAuth(uuid);
-		model.addAttribute("result", result);
 
 		return ResponseEntity.ok(new ResponseResult(result.isResult(), result.getMessage()));
 	}
@@ -59,7 +59,7 @@ public class MemberController {
 	}
 
 	@PostMapping("/withdraw")
-	public ResponseEntity<?> memberWithdrawSubmit(@RequestBody MemberDto.SignIn request) {
+	public ResponseEntity<?> withdraw(@RequestBody MemberDto.SignIn request) {
 		ServiceResult result = memberService.withdraw(request.getEmail(), request.getPassword());
 
 		return ResponseEntity.ok(

@@ -1,14 +1,15 @@
 package com.example.toyservice.service;
 
+import com.example.toyservice.components.GpsComponents;
 import com.example.toyservice.components.MailComponents;
 import com.example.toyservice.dto.MemberDto;
 import com.example.toyservice.exception.AuthenticationException;
+import com.example.toyservice.model.ServiceResult;
 import com.example.toyservice.model.ValidateResult;
+import com.example.toyservice.model.constants.Authority;
 import com.example.toyservice.model.constants.ErrorCode;
 import com.example.toyservice.model.constants.MemberStatus;
 import com.example.toyservice.model.entity.Member;
-import com.example.toyservice.model.ServiceResult;
-import com.example.toyservice.model.constants.Authority;
 import com.example.toyservice.repository.MemberRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,12 +37,20 @@ public class MemberService implements UserDetailsService {
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final MailComponents mailComponents;
+	private final GpsComponents gpsComponents;
 
 
-	public ServiceResult register(MemberDto.Request member) {
+	public ServiceResult register(String x, String y, MemberDto.Request member) {
 		boolean exists = memberRepository.existsByEmail(member.getEmail());
 		if (exists) {
-			return new ServiceResult(false, "이미 존재하는 회원 정보입니다.");
+			throw new AuthenticationException(ErrorCode.MEMBER_ALREADY_EXIST);
+		}
+
+		String[] address = gpsComponents.latAndLonToAddr(x, y).split(" ");
+		String zipcode = address[0]; // 우편번호에는 시, 군, 자치구를 구별하는 코드가 포함.
+		String dongName = address[1];
+		if (!member.getZipcode().equals(zipcode) || !member.getAddress1().contains(dongName)) {
+			throw new AuthenticationException(ErrorCode.ADDRESS_NOT_MATCH);
 		}
 
 		String uuid = UUID.randomUUID().toString();
@@ -59,19 +68,19 @@ public class MemberService implements UserDetailsService {
 		mailComponents.sendMail(email, subject, text);
 
 		return new ServiceResult(true, "emailAuthKey: " +
-			uuid + "이메일 인증을 해주세요.");
+			uuid + " 이메일 인증을 해주세요.");
 	}
 
 	public ServiceResult emailAuth(String emailAuthKey) {
 		Optional<Member> optionalMember = memberRepository.findByEmailAuthKey(emailAuthKey);
 		if (!optionalMember.isPresent()) {
-			return new ServiceResult(false, "잘못된 접근입니다.");
+			throw  new AuthenticationException(ErrorCode.EMAILAUTHKEY_NOT_FOUND);
 		}
 
 		Member member = optionalMember.get();
 
 		if (member.isEmailAuthYn()) {
-			return new ServiceResult(false, "이미 활성화가 되었습니다.");
+			throw  new AuthenticationException(ErrorCode.EMAIL_ALREADY_ACTIVATE);
 		}
 
 		member.setStatus(MemberStatus.ING);
@@ -125,9 +134,9 @@ public class MemberService implements UserDetailsService {
 		member.setStatus(MemberStatus.WITHDRAW);
 //		member.setResetPasswordKey("");
 //		member.setResetPasswordLimitDt(null);
-//		member.setZipcode("");
-//		member.setAddr("");
-//		member.setAddrDetail("");
+		member.setZipcode("");
+		member.setAddress1("");
+		member.setAddress2("");
 		memberRepository.save(member);
 
 		return new ServiceResult(true, "탈퇴되었습니다.");
@@ -142,14 +151,6 @@ public class MemberService implements UserDetailsService {
 		}
 		return list;
 	}
-
-//	public Member getMemberByEmail(String email) {
-//		Optional<Member> optionalMember = memberRepository.findByEmail(email);
-//		if (!optionalMember.isPresent()) {
-//			return null;
-//		}
-//		return optionalMember.get();
-//	}
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
