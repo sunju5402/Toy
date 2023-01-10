@@ -11,11 +11,15 @@ import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
 public class GpsComponents {
+
+	@Value("${kakao.key}")
+	private String apiKey;
 
 	/**
 	 * 위도와 경도를 이용하여 카카오주소api를 통해 주소 변환
@@ -43,7 +47,6 @@ public class GpsComponents {
 		HttpURLConnection conn = null;
 		StringBuffer response = new StringBuffer();
 
-		String apiKey = "bf0d46edabf2fcc3d0b3554f06ca4a33";
 		String auth = "KakaoAK " + apiKey;
 
 		//URL 설정

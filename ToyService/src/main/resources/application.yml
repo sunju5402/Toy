@@ -1,9 +1,13 @@
+
 spring:
+  profiles:
+    include: secret
+
   datasource:
     url: jdbc:mariadb://localhost:3306/toy
     driver-class-name: org.mariadb.jdbc.Driver
-    username: toy_user
-    password: 1111
+    username:
+    password:
 
   jpa:
     generate-ddl: true
@@ -16,13 +20,13 @@ spring:
     port: 6379
 
   jwt:
-    secret: c3ByaW5nLWJvb3QtdG95LXByb2plY3QtdHV0b3JpYWwtand0LXNlY3JldC1rZXkK
+    secret:
 
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ssunju5402@gmail.com
-    password: kdagndtpduuwfmxk
+    username:
+    password:
     properties:
       mail:
         smtp:
@@ -32,3 +36,6 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+
+kakao:
+  key:
