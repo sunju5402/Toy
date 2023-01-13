@@ -26,6 +26,8 @@ public class MemberDto {
 		@Email
 		private String email;
 		@NotBlank(message = "필수 입력입니다.")
+		@Pattern(regexp = "^[가-힣]{2,20}$",
+		message = "이름은 공백이 없이 한글로 2~20자로 입력해주세요.")
 		private String name;
 		@NotBlank(message = "필수 입력입니다.")
 		@Pattern(regexp = "^[ㄱ-ㅎ가-힣a-z0-9-_]{3,10}$",

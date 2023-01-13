@@ -5,7 +5,6 @@ import com.example.toyservice.components.MailComponents;
 import com.example.toyservice.dto.MemberDto;
 import com.example.toyservice.exception.AuthenticationException;
 import com.example.toyservice.model.ServiceResult;
-import com.example.toyservice.model.ValidateResult;
 import com.example.toyservice.model.constants.Authority;
 import com.example.toyservice.model.constants.ErrorCode;
 import com.example.toyservice.model.constants.MemberStatus;
@@ -14,7 +13,6 @@ import com.example.toyservice.repository.MemberRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +24,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.Errors;
-import org.springframework.validation.FieldError;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -41,9 +37,14 @@ public class MemberService implements UserDetailsService {
 
 
 	public ServiceResult register(String x, String y, MemberDto.Request member) {
-		boolean exists = memberRepository.existsByEmail(member.getEmail());
-		if (exists) {
+		boolean existsByEmail = memberRepository.existsByEmail(member.getEmail());
+		if (existsByEmail) {
 			throw new AuthenticationException(ErrorCode.MEMBER_ALREADY_EXIST);
+		}
+
+		boolean existsByNickname = memberRepository.existsByNickname(member.getNickname());
+		if (existsByNickname) {
+			throw new AuthenticationException(ErrorCode.NICKNAME_ALREADY_EXIST);
 		}
 
 		String[] address = gpsComponents.latAndLonToAddr(x, y).split(" ");
@@ -133,16 +134,6 @@ public class MemberService implements UserDetailsService {
 		memberRepository.save(member);
 
 		return new ServiceResult(true, "탈퇴되었습니다.");
-	}
-
-	public List<ValidateResult> validate(Errors errors) {
-		List<ValidateResult> list = new ArrayList<>();
-		ValidateResult result;
-		for (FieldError e : errors.getFieldErrors()) {
-			result = new ValidateResult(e.getField(), e.getDefaultMessage());
-			list.add(result);
-		}
-		return list;
 	}
 
 	@Override

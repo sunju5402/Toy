@@ -30,12 +30,7 @@ public class MemberController {
 	@PostMapping("/signup")
 	public ResponseEntity<?> signup(@Valid @RequestBody MemberDto.Request request
 		, @RequestParam("x") String x
-		, @RequestParam("y") String y
-		, Errors errors) {
-		if (errors.hasFieldErrors()) {
-			return ResponseEntity.ok(memberService.validate(errors));
-		}
-
+		, @RequestParam("y") String y) {
 		ServiceResult result = memberService.register(x, y, request);
 
 		return ResponseEntity.ok(
