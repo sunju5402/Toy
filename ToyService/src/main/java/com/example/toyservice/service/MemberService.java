@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 public class MemberService implements UserDetailsService {
 
 	private final MemberRepository memberRepository;
+	private final WalletService walletService;
 	private final PasswordEncoder passwordEncoder;
 	private final MailComponents mailComponents;
 	private final GpsComponents gpsComponents;
@@ -58,8 +59,8 @@ public class MemberService implements UserDetailsService {
 
 		member.setPassword(passwordEncoder.encode(member.getPassword()));
 		member.setEmailAuthKey(uuid);
-		memberRepository.save(member.toEntity());
-
+		Member saveMember = memberRepository.save(member.toEntity());
+		walletService.add(saveMember);
 
 		String email = member.getEmail();
 		String subject = "ToyService 가입을 축하드립니다. ";

@@ -24,13 +24,14 @@ public class TokenProvider {
 	private static final String KEY_ROLES = "roles";
 	private final MemberService memberService;
 
-	@Value("{spring.jwt.secret}")
+	@Value("${spring.jwt.secret}")
 	private String secretKey;
 
 
 	/**
 	 * 토큰 생성(발급)
 	 */
+//	String
 	public String generateToken(String email, List<GrantedAuthority> roles) {
 		Claims claims = Jwts.claims().setSubject(email);
 		claims.put(KEY_ROLES, roles);
@@ -42,30 +43,29 @@ public class TokenProvider {
 			.setClaims(claims)
 			.setIssuedAt(now)
 			.setExpiration(expiredDate)
-			.signWith(SignatureAlgorithm.HS512, secretKey) // 사용할 암호화 알고리즘, 비밀키
+			.signWith(SignatureAlgorithm.HS512, secretKey.getBytes()) // 사용할 암호화 알고리즘, 비밀키
 			.compact();
 	}
 
 	public Authentication getAuthentication(String jwt) {
-		UserDetails userDetails = memberService.loadUserByUsername(getEmail(jwt));
+		UserDetails userDetails = memberService.loadUserByUsername(getUsername(jwt));
 		return new UsernamePasswordAuthenticationToken(userDetails, "",
 			userDetails.getAuthorities());
 	}
 
-	public String getEmail(String token) {
+	public String getUsername(String token) {
 		return parseClaims(token).getSubject();
 	}
 
 	public boolean isValidToken(String token) {
 		if (!StringUtils.hasText(token)) return false;
-
 		Claims claims = parseClaims(token);
-		return claims.getExpiration().before(new Date()); // 토큰의 만료시간이 지금 시간의 이전인지
+		return !claims.getExpiration().before(new Date()); // 토큰의 만료시간이 지금 시간의 이전인지
 	}
 
 	private Claims parseClaims(String token) {
 		try {
-			return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+			return Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token).getBody();
 		} catch (ExpiredJwtException e) {
 			return e.getClaims();
 		}
