@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -31,9 +30,6 @@ public class TokenProvider {
 
 	/**
 	 * 토큰 생성(발급)
-	 * @param email
-	 * @param roles
-	 * @return
 	 */
 	public String generateToken(String email, List<GrantedAuthority> roles) {
 		Claims claims = Jwts.claims().setSubject(email);
@@ -51,9 +47,6 @@ public class TokenProvider {
 	}
 
 	public Authentication getAuthentication(String jwt) {
-//		UserDetails userDetails = memberService.loadUserByUsername(getEmail(jwt));
-//		return new UsernamePasswordAuthenticationToken(userDetails, "",
-//			userDetails.getAuthorities());
 		UserDetails userDetails = memberService.loadUserByUsername(getEmail(jwt));
 		return new UsernamePasswordAuthenticationToken(userDetails, "",
 			userDetails.getAuthorities());
@@ -63,7 +56,7 @@ public class TokenProvider {
 		return parseClaims(token).getSubject();
 	}
 
-	public boolean validateToken(String token) {
+	public boolean isValidToken(String token) {
 		if (!StringUtils.hasText(token)) return false;
 
 		Claims claims = parseClaims(token);

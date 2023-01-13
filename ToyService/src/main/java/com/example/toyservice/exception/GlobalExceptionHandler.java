@@ -26,9 +26,6 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(ApiRequestException.class)
 	public ErrorResponse handleUsernameException(ApiRequestException e) {
-		return new ErrorResponse(
-			ErrorCode.API_REQUEST_FAIL,
-			ErrorCode.API_REQUEST_FAIL.getDescription()
-		);
+		return new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
 	}
 }

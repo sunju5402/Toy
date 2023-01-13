@@ -44,10 +44,7 @@ public class MemberDto {
 		@Pattern(regexp = "^\\d{2,3}-\\d{3,4}-\\d{4}$",message = "전화번호 양식과 맞지 않습니다. "
 			+ "xx(x)-xxx(x)-xxxx")
 		private String phone;
-		// primitive boolean 타입이 is로 시작할때 is를 생략하고 json에서 넘어와 제대로 변환되지 않음.
-		// Boolean 래퍼 타입으로 바꿔줘도 매핑됨.
-		@JsonProperty("isAdmin")
-		private boolean isAdmin;
+		private boolean admin;
 
 		private boolean emailAuthYn;
 		private String emailAuthKey;
@@ -62,7 +59,7 @@ public class MemberDto {
 				.address1(address1)
 				.address2(address2)
 				.phone(phone)
-				.isAdmin(isAdmin)
+				.admin(admin)
 				.status(MemberStatus.REQ)
 				.regDt(LocalDateTime.now())
 				.emailAuthYn(false)

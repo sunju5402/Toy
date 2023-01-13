@@ -72,15 +72,11 @@ public class MemberService implements UserDetailsService {
 	}
 
 	public ServiceResult emailAuth(String emailAuthKey) {
-		Optional<Member> optionalMember = memberRepository.findByEmailAuthKey(emailAuthKey);
-		if (!optionalMember.isPresent()) {
-			throw  new AuthenticationException(ErrorCode.EMAILAUTHKEY_NOT_FOUND);
-		}
-
-		Member member = optionalMember.get();
+		Member member = memberRepository.findByEmailAuthKey(emailAuthKey)
+			.orElseThrow(() -> new AuthenticationException(ErrorCode.EMAILAUTHKEY_NOT_FOUND));
 
 		if (member.isEmailAuthYn()) {
-			throw  new AuthenticationException(ErrorCode.EMAIL_ALREADY_ACTIVATE);
+			throw new AuthenticationException(ErrorCode.EMAIL_ALREADY_ACTIVATE);
 		}
 
 		member.setStatus(MemberStatus.ING);
@@ -92,11 +88,8 @@ public class MemberService implements UserDetailsService {
 	}
 
 	public Member authenticate(MemberDto.SignIn singIn) {
-		Member member = memberRepository.findByEmail(singIn.getEmail()).orElse(null);
-
-		if (member == null) {
-			throw new AuthenticationException(ErrorCode.EMAIL_NOT_FOUND);
-		}
+		Member member = memberRepository.findByEmail(singIn.getEmail())
+			.orElseThrow(() -> new AuthenticationException(ErrorCode.EMAIL_NOT_FOUND));
 
 		if (MemberStatus.REQ.equals(member.getStatus())) {
 			throw new AuthenticationException(ErrorCode.EMAIL_NOT_ACTIVATE);
@@ -114,10 +107,8 @@ public class MemberService implements UserDetailsService {
 	}
 
 	public ServiceResult withdraw(String email, String password) {
-		Member member = memberRepository.findByEmail(email).orElse(null);
-		if (member == null) {
-			throw  new AuthenticationException(ErrorCode.MEMBER_NOT_FOUND);
-		}
+		Member member = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new AuthenticationException(ErrorCode.MEMBER_NOT_FOUND));
 
 		if (!passwordEncoder.matches(password, member.getPassword())) {
 			throw new AuthenticationException(ErrorCode.PASSWORD_NOT_MATCH);
@@ -132,8 +123,10 @@ public class MemberService implements UserDetailsService {
 		member.setEmailAuthDt(null);
 		member.setEmailAuthKey("");
 		member.setStatus(MemberStatus.WITHDRAW);
-//		member.setResetPasswordKey("");
-//		member.setResetPasswordLimitDt(null);
+		/** to-do 비밀번호 찾기
+		member.setResetPasswordKey("");
+		member.setResetPasswordLimitDt(null);
+		 **/
 		member.setZipcode("");
 		member.setAddress1("");
 		member.setAddress2("");
@@ -154,12 +147,8 @@ public class MemberService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//		Member member = memberRepository.findByEmail(username)
-//			.orElseThrow(() -> new UsernameNotFoundException("회원 정보가 없습니다."));
-		Member member = memberRepository.findByEmail(username).orElse(null);
-		if (member == null) {
-			throw new UsernameNotFoundException("회원 정보가 없습니다.");
-		}
+		Member member = memberRepository.findByEmail(username)
+			.orElseThrow(() -> new UsernameNotFoundException("회원 정보가 없습니다."));
 
 		List<GrantedAuthority> grantedAuthorities = getAuthority(member);
 

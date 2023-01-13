@@ -36,7 +36,7 @@ application-secret.yml
 
 ### VS Code ###
 .vscode/
-
+logs
 
 
 # User-specific stuff

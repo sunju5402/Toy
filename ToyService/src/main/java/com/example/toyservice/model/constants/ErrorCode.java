@@ -6,9 +6,13 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+	ERROR_CODE_400("해당 명령을 실행할 수 없습니다."),
+	ERROR_CODE_401("Authorization이 잘못되었습니다."),
+	ERROR_CODE_500("서버 에러, 문의가 필요합니다."),
 	EMAIL_NOT_ACTIVATE("이메일이 활성화되지 않았습니다."),
 	EMAIL_ALREADY_ACTIVATE("이미 활성화가 되었습니다."),
 	EMAILAUTHKEY_NOT_FOUND("잘못된 접근입니다."),
+	EMAIL_SEND_FAIL("이메일 보내기를 실패하였습니다."),
 	MEMBER_WITHDRAW("탈퇴한 회원입니다."),
 	EMAIL_NOT_FOUND("존재하지 않는 이메일입니다."),
 	PASSWORD_NOT_MATCH("비밀번호가 일치하지 않습니다."),
