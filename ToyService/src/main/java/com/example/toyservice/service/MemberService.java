@@ -5,7 +5,6 @@ import com.example.toyservice.components.MailComponents;
 import com.example.toyservice.dto.MemberDto;
 import com.example.toyservice.exception.AuthenticationException;
 import com.example.toyservice.model.ServiceResult;
-import com.example.toyservice.model.ValidateResult;
 import com.example.toyservice.model.constants.Authority;
 import com.example.toyservice.model.constants.ErrorCode;
 import com.example.toyservice.model.constants.MemberStatus;
@@ -14,7 +13,6 @@ import com.example.toyservice.repository.MemberRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +24,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.Errors;
-import org.springframework.validation.FieldError;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -41,9 +37,14 @@ public class MemberService implements UserDetailsService {
 
 
 	public ServiceResult register(String x, String y, MemberDto.Request member) {
-		boolean exists = memberRepository.existsByEmail(member.getEmail());
-		if (exists) {
+		boolean existsByEmail = memberRepository.existsByEmail(member.getEmail());
+		if (existsByEmail) {
 			throw new AuthenticationException(ErrorCode.MEMBER_ALREADY_EXIST);
+		}
+
+		boolean existsByNickname = memberRepository.existsByNickname(member.getNickname());
+		if (existsByNickname) {
+			throw new AuthenticationException(ErrorCode.NICKNAME_ALREADY_EXIST);
 		}
 
 		String[] address = gpsComponents.latAndLonToAddr(x, y).split(" ");
@@ -72,15 +73,11 @@ public class MemberService implements UserDetailsService {
 	}
 
 	public ServiceResult emailAuth(String emailAuthKey) {
-		Optional<Member> optionalMember = memberRepository.findByEmailAuthKey(emailAuthKey);
-		if (!optionalMember.isPresent()) {
-			throw  new AuthenticationException(ErrorCode.EMAILAUTHKEY_NOT_FOUND);
-		}
-
-		Member member = optionalMember.get();
+		Member member = memberRepository.findByEmailAuthKey(emailAuthKey)
+			.orElseThrow(() -> new AuthenticationException(ErrorCode.EMAILAUTHKEY_NOT_FOUND));
 
 		if (member.isEmailAuthYn()) {
-			throw  new AuthenticationException(ErrorCode.EMAIL_ALREADY_ACTIVATE);
+			throw new AuthenticationException(ErrorCode.EMAIL_ALREADY_ACTIVATE);
 		}
 
 		member.setStatus(MemberStatus.ING);
@@ -92,11 +89,8 @@ public class MemberService implements UserDetailsService {
 	}
 
 	public Member authenticate(MemberDto.SignIn singIn) {
-		Member member = memberRepository.findByEmail(singIn.getEmail()).orElse(null);
-
-		if (member == null) {
-			throw new AuthenticationException(ErrorCode.EMAIL_NOT_FOUND);
-		}
+		Member member = memberRepository.findByEmail(singIn.getEmail())
+			.orElseThrow(() -> new AuthenticationException(ErrorCode.EMAIL_NOT_FOUND));
 
 		if (MemberStatus.REQ.equals(member.getStatus())) {
 			throw new AuthenticationException(ErrorCode.EMAIL_NOT_ACTIVATE);
@@ -114,10 +108,8 @@ public class MemberService implements UserDetailsService {
 	}
 
 	public ServiceResult withdraw(String email, String password) {
-		Member member = memberRepository.findByEmail(email).orElse(null);
-		if (member == null) {
-			throw  new AuthenticationException(ErrorCode.MEMBER_NOT_FOUND);
-		}
+		Member member = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new AuthenticationException(ErrorCode.MEMBER_NOT_FOUND));
 
 		if (!passwordEncoder.matches(password, member.getPassword())) {
 			throw new AuthenticationException(ErrorCode.PASSWORD_NOT_MATCH);
@@ -132,8 +124,10 @@ public class MemberService implements UserDetailsService {
 		member.setEmailAuthDt(null);
 		member.setEmailAuthKey("");
 		member.setStatus(MemberStatus.WITHDRAW);
-//		member.setResetPasswordKey("");
-//		member.setResetPasswordLimitDt(null);
+		/** to-do 비밀번호 찾기
+		member.setResetPasswordKey("");
+		member.setResetPasswordLimitDt(null);
+		 **/
 		member.setZipcode("");
 		member.setAddress1("");
 		member.setAddress2("");
@@ -142,24 +136,10 @@ public class MemberService implements UserDetailsService {
 		return new ServiceResult(true, "탈퇴되었습니다.");
 	}
 
-	public List<ValidateResult> validate(Errors errors) {
-		List<ValidateResult> list = new ArrayList<>();
-		ValidateResult result;
-		for (FieldError e : errors.getFieldErrors()) {
-			result = new ValidateResult(e.getField(), e.getDefaultMessage());
-			list.add(result);
-		}
-		return list;
-	}
-
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//		Member member = memberRepository.findByEmail(username)
-//			.orElseThrow(() -> new UsernameNotFoundException("회원 정보가 없습니다."));
-		Member member = memberRepository.findByEmail(username).orElse(null);
-		if (member == null) {
-			throw new UsernameNotFoundException("회원 정보가 없습니다.");
-		}
+		Member member = memberRepository.findByEmail(username)
+			.orElseThrow(() -> new UsernameNotFoundException("회원 정보가 없습니다."));
 
 		List<GrantedAuthority> grantedAuthorities = getAuthority(member);
 

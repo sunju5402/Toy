@@ -30,7 +30,7 @@ public class Member extends BaseEntity {
 	private String address2; // 상세주소
 	private String phone;
 	private LocalDateTime regDt;
-	private boolean isAdmin;
+	private boolean admin;
 
 	private boolean emailAuthYn;
 	private LocalDateTime emailAuthDt;

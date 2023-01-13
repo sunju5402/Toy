@@ -2,17 +2,20 @@ package com.example.toyservice.components;
 
 import com.example.toyservice.exception.ApiRequestException;
 import com.example.toyservice.model.constants.ErrorCode;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.Charset;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RequiredArgsConstructor
 @Component
@@ -26,61 +29,45 @@ public class GpsComponents {
 	 */
 	public String latAndLonToAddr(String x, String y) {
 		String url = "https://dapi.kakao.com/v2/local/geo/coord2address.json?x="+x+"&y="+y;
-		String addr = "";
 
 		try {
-			addr = getZipcodeAndDongName(getJSONData(url));
-		} catch (ApiRequestException e) {
-			throw  new ApiRequestException(ErrorCode.API_REQUEST_FAIL);
+			return getZipcodeAndDongName(getJSONData(url));
 		} catch (Exception e) {
-			System.out.println("주소 api 요청 에러");
-			e.printStackTrace();
+			throw  new ApiRequestException(ErrorCode.API_REQUEST_FAIL);
 		}
-
-		return addr;
 	}
 
 	/**
 	 * REST API로 통신하여 받은 JSON형태의 데이터를 String으로 받아오는 메소드
 	 */
-	private String getJSONData(String apiUrl) throws Exception {
-		HttpURLConnection conn = null;
-		StringBuffer response = new StringBuffer();
-
+	private String getJSONData(String apiUrl) {
 		String auth = "KakaoAK " + apiKey;
 
-		//URL 설정
-		URL url = new URL(apiUrl);
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add("Authorization", auth);
+		httpHeaders.add("X-Requested-With", "curl");
+		HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
 
-		conn = (HttpURLConnection) url.openConnection();
+		URI targetUrl = UriComponentsBuilder
+			.fromUriString(apiUrl)
+			.build()
+			.encode(StandardCharsets.UTF_8) //인코딩
+			.toUri();
 
-		//Request 형식 설정
-		conn.setRequestMethod("GET");
-		conn.setRequestProperty("X-Requested-With", "curl");
-		conn.setRequestProperty("Authorization", auth);
+		ResponseEntity<String> result = restTemplate.exchange(targetUrl,
+			HttpMethod.GET, httpEntity, String.class);
 
-		//request에 JSON data 준비
-		conn.setDoOutput(true);
-
-		//보내고 결과값 받기
-		int responseCode = conn.getResponseCode();
+		int responseCode = result.getStatusCodeValue();
 		if (responseCode == 400) {
-			System.out.println("400:: 해당 명령을 실행할 수 없음");
+			throw new ApiRequestException(ErrorCode.ERROR_CODE_400);
 		} else if (responseCode == 401) {
-			System.out.println("401:: Authorization가 잘못됨");
+			throw new ApiRequestException(ErrorCode.ERROR_CODE_401);
 		} else if (responseCode == 500) {
-			System.out.println("500:: 서버 에러, 문의 필요");
-		} else { // 성공 후 응답 JSON 데이터받기
-			Charset charset = Charset.forName("UTF-8");
-			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), charset));
-
-			String inputLine;
-			while ((inputLine = br.readLine()) != null) {
-				response.append(inputLine);
-			}
+			throw new ApiRequestException(ErrorCode.ERROR_CODE_500);
 		}
 
-		return response.toString();
+		return result.getBody();
 	}
 
 	private String getZipcodeAndDongName(String jsonString) { // 주소에서 우편번호와 "동"이름 가져오기

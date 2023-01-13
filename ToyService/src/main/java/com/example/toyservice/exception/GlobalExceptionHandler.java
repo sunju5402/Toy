@@ -4,6 +4,7 @@ import com.example.toyservice.dto.ErrorResponse;
 import com.example.toyservice.model.constants.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -26,9 +27,12 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(ApiRequestException.class)
 	public ErrorResponse handleUsernameException(ApiRequestException e) {
-		return new ErrorResponse(
-			ErrorCode.API_REQUEST_FAIL,
-			ErrorCode.API_REQUEST_FAIL.getDescription()
-		);
+		return new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+		return new ErrorResponse(ErrorCode.VALID_ERROR, e.getFieldError().getDefaultMessage());
+
 	}
 }
