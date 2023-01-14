@@ -1,13 +1,11 @@
 package com.example.toyservice.components;
 
+import com.example.toyservice.dto.KakaoApi;
 import com.example.toyservice.exception.ApiRequestException;
 import com.example.toyservice.model.constants.ErrorCode;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -28,19 +26,19 @@ public class GpsComponents {
 	 * 위도와 경도를 이용하여 카카오주소api를 통해 주소 변환
 	 */
 	public String latAndLonToAddr(String x, String y) {
-		String url = "https://dapi.kakao.com/v2/local/geo/coord2address.json?x="+x+"&y="+y;
+		String url = "https://dapi.kakao.com/v2/local/geo/coord2address.json?x=" + x + "&y=" + y;
 
 		try {
 			return getZipcodeAndDongName(getJSONData(url));
 		} catch (Exception e) {
-			throw  new ApiRequestException(ErrorCode.API_REQUEST_FAIL);
+			throw new ApiRequestException(ErrorCode.API_REQUEST_FAIL);
 		}
 	}
 
 	/**
-	 * REST API로 통신하여 받은 JSON형태의 데이터를 String으로 받아오는 메소드
+	 * REST API로 통신하여 받은 JSON형태의 데이터를 KakaoApi로 받아오는 메소드
 	 */
-	private String getJSONData(String apiUrl) {
+	private KakaoApi getJSONData(String apiUrl) {
 		String auth = "KakaoAK " + apiKey;
 
 		RestTemplate restTemplate = new RestTemplate();
@@ -55,8 +53,8 @@ public class GpsComponents {
 			.encode(StandardCharsets.UTF_8) //인코딩
 			.toUri();
 
-		ResponseEntity<String> result = restTemplate.exchange(targetUrl,
-			HttpMethod.GET, httpEntity, String.class);
+		ResponseEntity<KakaoApi> result = restTemplate.exchange(targetUrl,
+			HttpMethod.GET, httpEntity, KakaoApi.class);
 
 		int responseCode = result.getStatusCodeValue();
 		if (responseCode == 400) {
@@ -70,29 +68,33 @@ public class GpsComponents {
 		return result.getBody();
 	}
 
-	private String getZipcodeAndDongName(String jsonString) { // 주소에서 우편번호와 "동"이름 가져오기
-		String result = "";
-		JSONObject jObj = (JSONObject) JSONValue.parse(jsonString);
-		JSONObject meta = (JSONObject) jObj.get("meta");
-		long size = (long) meta.get("total_count");
-
-		if(size > 0){
-			JSONArray jArray = (JSONArray) jObj.get("documents");
-			JSONObject subJob = (JSONObject) jArray.get(0);
-
-			JSONObject roadAddress = (JSONObject) subJob.get("road_address");
-			result = (String) roadAddress.get("zone_no") + " ";
-
-			JSONObject address = (JSONObject) subJob.get("address");
-			result += (String) address.get("region_3depth_name"); // 동이름
-
-			if(result.equals("") || result==null){
-				subJob = (JSONObject) jArray.get(1);
-				subJob = (JSONObject) subJob.get("address");
-				result =(String) subJob.get("region_3depth_name");
-			}
+	private String getZipcodeAndDongName(KakaoApi kakaoApi) { // 주소에서 우편번호와 "동"이름 가져오기
+		int size = kakaoApi.getDocuments().size();
+		if (size == 0) {
+			throw new ApiRequestException(ErrorCode.NOT_EXIST_ADDRESS);
 		}
 
-		return result;
+		boolean existZoneNo = false;
+		boolean existDong = false;
+		String zoneNo = "";
+		String dong = "";
+		for (int i = 0; i < size; i++) {
+			zoneNo = kakaoApi.getDocuments().get(i).getRoad_address().getZone_no();
+			dong = kakaoApi.getDocuments().get(i).getAddress().getRegion_3depth_name();
+			if (!zoneNo.equals("") && zoneNo != null) {
+				existZoneNo = true;
+			}
+			if (!dong.equals("") && dong != null) {
+				existDong = true;
+			}
+
+			if (existZoneNo && existDong) {
+				return zoneNo + " " + dong;
+			}
+			existZoneNo = false;
+			existDong = false;
+		}
+
+		throw new ApiRequestException(ErrorCode.NOT_EXIST_ADDRESS);
 	}
 }

@@ -46,9 +46,8 @@ public class MemberDto {
 			+ "xx(x)-xxx(x)-xxxx")
 		private String phone;
 		private boolean admin;
-
-		private boolean emailAuthYn;
 		private String emailAuthKey;
+		private boolean rejoin;
 
 		public Member toEntity() {
 			return Member.builder()
@@ -63,8 +62,26 @@ public class MemberDto {
 				.admin(admin)
 				.status(MemberStatus.REQ)
 				.regDt(LocalDateTime.now())
-				.emailAuthYn(false)
+				.emailAuth(false)
 				.emailAuthKey(emailAuthKey)
+				.rejoin(rejoin)
+				.build();
+		}
+	}
+
+	@Getter
+	@Setter
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Builder
+	public static class Response {
+		private String name;
+		private String email;
+
+		public static Response fromEntity(Member member) {
+			return Response.builder()
+				.name(member.getName())
+				.email(member.getEmail())
 				.build();
 		}
 	}
@@ -76,5 +93,46 @@ public class MemberDto {
 	public static class SignIn {
 		private String email;
 		private String password;
+	}
+
+	@Getter
+	@Setter
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Builder
+	public static class Withdraw {
+		private String name;
+		private String email;
+		private String password;
+		private String nickname;
+		private String phone;
+		private String zipcode;
+		private String address1;
+		private String address2;
+		private MemberStatus status;
+		private LocalDateTime regDt;
+		private boolean emailAuth;
+		private String emailAuthKey;
+		private LocalDateTime emailAuthDt;
+		private WalletDto.Response wallet;
+
+		public static Withdraw fromEntity(Member member) {
+			return Withdraw.builder()
+				.name(member.getName())
+				.email(member.getEmail())
+				.password(member.getPassword())
+				.nickname(member.getNickname())
+				.phone(member.getPhone())
+				.zipcode(member.getZipcode())
+				.address1(member.getAddress1())
+				.address2(member.getAddress2())
+				.status(member.getStatus())
+				.regDt(member.getRegDt())
+				.emailAuth(member.isEmailAuth())
+				.emailAuthKey(member.getEmailAuthKey())
+				.emailAuthDt(member.getEmailAuthDt())
+				.wallet(WalletDto.Response.fromEntity(member.getWallet()))
+				.build();
+		}
 	}
 }

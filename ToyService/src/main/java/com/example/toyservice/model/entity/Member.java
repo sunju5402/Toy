@@ -1,6 +1,7 @@
 package com.example.toyservice.model.entity;
 
 import com.example.toyservice.model.constants.MemberStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -35,14 +36,16 @@ public class Member extends BaseEntity {
 	private LocalDateTime regDt;
 	private boolean admin;
 
-	private boolean emailAuthYn;
+	private boolean emailAuth;
 	private LocalDateTime emailAuthDt;
 	private String emailAuthKey;
 
 	@Enumerated(EnumType.STRING)
 	private MemberStatus status;
+	private boolean rejoin;
 
 	@OneToOne(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+	@JsonIgnore // 응답시, 순환참조 방지
 	@JoinColumn(name = "wallet_id")
 	private Wallet wallet;
 }

@@ -9,15 +9,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ResponseResult {
-	boolean result;
+	Object result;
 	String message;
 
-	public ResponseResult(boolean result, String message) {
+	public ResponseResult(Object result, String message) {
 		this.result = result;
 		this.message = message;
 	}
 
-	public ResponseResult(boolean result) {
+	public ResponseResult(Object result) {
 		this.result = result;
 	}
 }
