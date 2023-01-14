@@ -24,11 +24,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private final JwtAuthenticationFilter authenticationFilter;
 
-//	@Bean
-//	UserAuthenticationFailureHandler getFailureHandler() {
-//		return new UserAuthenticationFailureHandler();
-//	}
-
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring()

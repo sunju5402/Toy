@@ -1,8 +1,7 @@
 package com.example.toyservice.dto;
 
-import com.example.toyservice.model.entity.Member;
 import com.example.toyservice.model.constants.MemberStatus;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.example.toyservice.model.entity.Member;
 import java.time.LocalDateTime;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;

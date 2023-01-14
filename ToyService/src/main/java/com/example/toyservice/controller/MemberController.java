@@ -9,7 +9,6 @@ import com.example.toyservice.service.MemberService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,6 +49,7 @@ public class MemberController {
 		Member member = memberService.authenticate(request);
 		String token = tokenProvider.generateToken(member.getEmail(),
 			memberService.getAuthority(member)); // roles
+//		String token = tokenProvider.generateToken(member.getEmail(), member.getRoles());
 		return ResponseEntity.ok(new ResponseResult(true, "토큰 : " + token));
 	}
 
