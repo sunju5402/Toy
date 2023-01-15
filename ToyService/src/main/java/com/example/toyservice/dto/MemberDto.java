@@ -2,6 +2,7 @@ package com.example.toyservice.dto;
 
 import com.example.toyservice.model.constants.MemberStatus;
 import com.example.toyservice.model.entity.Member;
+import com.example.toyservice.model.entity.Wallet;
 import java.time.LocalDateTime;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -114,7 +115,7 @@ public class MemberDto {
 		private boolean emailAuth;
 		private String emailAuthKey;
 		private LocalDateTime emailAuthDt;
-		private WalletDto.Response wallet;
+		private Wallet wallet;
 
 		public static Withdraw fromEntity(Member member) {
 			return Withdraw.builder()
@@ -131,7 +132,7 @@ public class MemberDto {
 				.emailAuth(member.isEmailAuth())
 				.emailAuthKey(member.getEmailAuthKey())
 				.emailAuthDt(member.getEmailAuthDt())
-				.wallet(WalletDto.Response.fromEntity(member.getWallet()))
+				.wallet(member.getWallet())
 				.build();
 		}
 	}

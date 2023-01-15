@@ -34,8 +34,4 @@ public class WalletService {
 			.build();
 		walletRepository.save(wallet);
 	}
-
-	public void delete(Long memberId) {
-		walletRepository.delete(getWallet(memberId));
-	}
 }

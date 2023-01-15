@@ -1,6 +1,7 @@
 package com.example.toyservice.controller;
 
 import com.example.toyservice.dto.MemberDto;
+import com.example.toyservice.dto.RevisionMember;
 import com.example.toyservice.model.ResponseResult;
 import com.example.toyservice.model.entity.Member;
 import com.example.toyservice.security.TokenProvider;
@@ -8,10 +9,12 @@ import com.example.toyservice.service.MemberService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,7 +54,23 @@ public class MemberController {
 		return ResponseEntity.ok(new ResponseResult(true, "토큰 : " + token));
 	}
 
+	@GetMapping("/members/{id}")
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<ResponseResult> getMember(@PathVariable Long id) {
+		return ResponseEntity.ok(new ResponseResult(
+			memberService.getMember(id), "회원정보 조회에 성공하였습니다."));
+	}
+	@PutMapping("/members/{id}")
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<ResponseResult> memberRevision(
+		@PathVariable Long id,
+		@Valid @RequestBody RevisionMember.Request request) {
+		return ResponseEntity.ok(new ResponseResult(
+			memberService.revise(id, request), "회원정보 수정이 완료되었습니다."));
+	}
+
 	@DeleteMapping("/members/{id}")
+	@PreAuthorize("hasRole('USER')")
 	public ResponseEntity<ResponseResult> withdraw(
 		@PathVariable Long id,
 		@RequestBody MemberDto.SignIn request) {

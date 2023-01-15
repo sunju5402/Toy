@@ -3,6 +3,7 @@ package com.example.toyservice.service;
 import com.example.toyservice.components.GpsComponents;
 import com.example.toyservice.components.MailComponents;
 import com.example.toyservice.dto.MemberDto;
+import com.example.toyservice.dto.RevisionMember;
 import com.example.toyservice.exception.AuthenticationException;
 import com.example.toyservice.model.constants.Authority;
 import com.example.toyservice.model.constants.ErrorCode;
@@ -80,6 +81,26 @@ public class MemberService implements UserDetailsService {
 		return member.toEntity();
 	}
 
+	public Member getMember(Long id) {
+		return memberRepository.findById(id)
+			.orElseThrow(() -> new AuthenticationException(ErrorCode.MEMBER_NOT_FOUND));
+	}
+
+	public RevisionMember.Response revise(Long memberId, RevisionMember.Request revisionMember) {
+		Member member = getMember(memberId);
+
+		boolean existsByNickname = memberRepository.existsByNickname(revisionMember.getNickname());
+		if (existsByNickname) {
+			throw new AuthenticationException(ErrorCode.NICKNAME_ALREADY_EXIST);
+		}
+
+		member.setNickname(revisionMember.getNickname());
+		member.setPassword(passwordEncoder.encode(revisionMember.getPassword()));
+		member.setPhone(revisionMember.getPhone());;
+
+		return RevisionMember.Response.fromEntity(memberRepository.save(member));
+	}
+
 	public MemberDto.Response emailAuth(String emailAuthKey) {
 		Member member = memberRepository.findByEmailAuthKey(emailAuthKey)
 			.orElseThrow(() -> new AuthenticationException(ErrorCode.EMAILAUTHKEY_NOT_FOUND));
@@ -114,8 +135,7 @@ public class MemberService implements UserDetailsService {
 	}
 
 	public MemberDto.Withdraw withdraw(Long id, MemberDto.SignIn request) {
-		Member member = memberRepository.findById(id)
-			.orElseThrow(() -> new AuthenticationException(ErrorCode.MEMBER_NOT_FOUND));
+		Member member = getMember(id);
 
 		if (member.getEmail().contains("탈퇴")) {
 			throw new AuthenticationException(ErrorCode.MEMBER_WITHDRAW);
@@ -124,8 +144,6 @@ public class MemberService implements UserDetailsService {
 		if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
 			throw new AuthenticationException(ErrorCode.PASSWORD_NOT_MATCH);
 		}
-
-		walletService.delete(member.getId());
 
 		member.setName("사용자 정보가 없습니다.");
 		member.setPhone("");
@@ -139,6 +157,7 @@ public class MemberService implements UserDetailsService {
 		member.setZipcode("");
 		member.setAddress1("");
 		member.setAddress2("");
+		member.setWallet(null);
 
 		return MemberDto.Withdraw.fromEntity(memberRepository.save(member));
 	}

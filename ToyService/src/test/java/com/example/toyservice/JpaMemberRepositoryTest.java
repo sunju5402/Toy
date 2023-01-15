@@ -34,7 +34,7 @@ public class JpaMemberRepositoryTest {
 			.admin(true)
 			.status(MemberStatus.REQ)
 			.regDt(LocalDateTime.now())
-			.emailAuthYn(false)
+			.emailAuth(false)
 			.build();
 	    // when
 		memberRepository.save(m);
