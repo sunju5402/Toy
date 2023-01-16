@@ -3,6 +3,7 @@ package com.example.toyservice.controller;
 import com.example.toyservice.dto.WalletDto;
 import com.example.toyservice.model.ResponseResult;
 import com.example.toyservice.service.WalletService;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,7 +32,7 @@ public class WalletController {
 	@PreAuthorize("hasRole('USER')")
 	public ResponseEntity<ResponseResult> chargeBalance(
 		@PathVariable Long id
-		, @RequestBody WalletDto.Request request) {
+		, @Valid @RequestBody WalletDto.Request request) {
 		return ResponseEntity.ok(
 			new ResponseResult(WalletDto.Response.fromEntity(
 				walletService.charge(id, request.getBalance()))
