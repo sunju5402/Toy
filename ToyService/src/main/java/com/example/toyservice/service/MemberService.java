@@ -9,6 +9,7 @@ import com.example.toyservice.model.constants.Authority;
 import com.example.toyservice.model.constants.ErrorCode;
 import com.example.toyservice.model.constants.MemberStatus;
 import com.example.toyservice.model.entity.Member;
+import com.example.toyservice.model.entity.SellPost;
 import com.example.toyservice.repository.MemberRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -96,7 +97,7 @@ public class MemberService implements UserDetailsService {
 
 		member.setNickname(revisionMember.getNickname());
 		member.setPassword(passwordEncoder.encode(revisionMember.getPassword()));
-		member.setPhone(revisionMember.getPhone());;
+		member.setPhone(revisionMember.getPhone());
 
 		return RevisionMember.Response.fromEntity(memberRepository.save(member));
 	}
@@ -158,6 +159,7 @@ public class MemberService implements UserDetailsService {
 		member.setAddress1("");
 		member.setAddress2("");
 		member.setWallet(null);
+		// TODO sell_post 삭제 구현
 
 		return MemberDto.Withdraw.fromEntity(memberRepository.save(member));
 	}
