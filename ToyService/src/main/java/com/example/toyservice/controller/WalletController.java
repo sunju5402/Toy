@@ -1,17 +1,15 @@
 package com.example.toyservice.controller;
 
 import com.example.toyservice.dto.WalletDto;
-import com.example.toyservice.model.ServiceResult;
+import com.example.toyservice.model.ResponseResult;
 import com.example.toyservice.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -20,18 +18,23 @@ public class WalletController {
 
 	private final WalletService walletService;
 
-	@GetMapping("/member/wallet")
-	public ResponseEntity<?> memberWallet(@RequestParam("id") Long id) {
-		return ResponseEntity.ok(walletService.getWallet(id));
+	@GetMapping("/members/{id}/wallets")
+	@PreAuthorize("hasRole('USER')")
+	public ResponseEntity<ResponseResult> memberWallet(
+		@PathVariable Long id) {
+		return ResponseEntity.ok(
+			new ResponseResult(walletService.getWallet(id),
+				"wallet 정보를 성공적으로 조회했습니다."));
 	}
 
-	@PostMapping("/member/wallet")
+	@PutMapping("/members/{id}/wallets")
 	@PreAuthorize("hasRole('USER')")
-	public ResponseEntity<?> memberWalletSubmit(
-		@RequestParam("id") Long id
+	public ResponseEntity<ResponseResult> chargeBalance(
+		@PathVariable Long id
 		, @RequestBody WalletDto.Request request) {
-		ServiceResult result = walletService.charge(id, request.getBalance());
 		return ResponseEntity.ok(
-			new ServiceResult(result.isResult(), result.getMessage()));
+			new ResponseResult(WalletDto.Response.fromEntity(
+				walletService.charge(id, request.getBalance()))
+				, "충전이 완료되었습니다."));
 	}
 }

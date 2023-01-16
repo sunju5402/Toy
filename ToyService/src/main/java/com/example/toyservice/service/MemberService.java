@@ -3,8 +3,8 @@ package com.example.toyservice.service;
 import com.example.toyservice.components.GpsComponents;
 import com.example.toyservice.components.MailComponents;
 import com.example.toyservice.dto.MemberDto;
+import com.example.toyservice.dto.RevisionMember;
 import com.example.toyservice.exception.AuthenticationException;
-import com.example.toyservice.model.ServiceResult;
 import com.example.toyservice.model.constants.Authority;
 import com.example.toyservice.model.constants.ErrorCode;
 import com.example.toyservice.model.constants.MemberStatus;
@@ -24,8 +24,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class MemberService implements UserDetailsService {
@@ -37,10 +39,17 @@ public class MemberService implements UserDetailsService {
 	private final GpsComponents gpsComponents;
 
 
-	public ServiceResult register(String x, String y, MemberDto.Request member) {
+	public Member register(String x, String y, MemberDto.Request member) {
 		boolean existsByEmail = memberRepository.existsByEmail(member.getEmail());
 		if (existsByEmail) {
-			throw new AuthenticationException(ErrorCode.MEMBER_ALREADY_EXIST);
+			// 탈퇴한 회원인지 확인.
+			if (!memberRepository.findByEmail(member.getEmail()).get().getNickname().equals("")) {
+				throw new AuthenticationException(ErrorCode.MEMBER_ALREADY_EXIST);
+			}
+			// 로그인시 탈퇴회원과 구분하기 위해 email 수정.
+			memberRepository.findByEmail(member.getEmail()).
+				get().setEmail("탈퇴" + member.getEmail());
+			member.setRejoin(true);
 		}
 
 		boolean existsByNickname = memberRepository.existsByNickname(member.getNickname());
@@ -69,24 +78,41 @@ public class MemberService implements UserDetailsService {
 			+ "<div><a target='_blank' href='http://localhost:8080/email-auth?id=" + uuid + "'> 가입 완료 </a></div>";
 		mailComponents.sendMail(email, subject, text);
 
-		return new ServiceResult(true, "emailAuthKey: " +
-			uuid + " 이메일 인증을 해주세요.");
+		return member.toEntity();
 	}
 
-	public ServiceResult emailAuth(String emailAuthKey) {
+	public Member getMember(Long id) {
+		return memberRepository.findById(id)
+			.orElseThrow(() -> new AuthenticationException(ErrorCode.MEMBER_NOT_FOUND));
+	}
+
+	public RevisionMember.Response revise(Long memberId, RevisionMember.Request revisionMember) {
+		Member member = getMember(memberId);
+
+		boolean existsByNickname = memberRepository.existsByNickname(revisionMember.getNickname());
+		if (existsByNickname) {
+			throw new AuthenticationException(ErrorCode.NICKNAME_ALREADY_EXIST);
+		}
+
+		member.setNickname(revisionMember.getNickname());
+		member.setPassword(passwordEncoder.encode(revisionMember.getPassword()));
+		member.setPhone(revisionMember.getPhone());;
+
+		return RevisionMember.Response.fromEntity(memberRepository.save(member));
+	}
+
+	public MemberDto.Response emailAuth(String emailAuthKey) {
 		Member member = memberRepository.findByEmailAuthKey(emailAuthKey)
 			.orElseThrow(() -> new AuthenticationException(ErrorCode.EMAILAUTHKEY_NOT_FOUND));
 
-		if (member.isEmailAuthYn()) {
+		if (member.isEmailAuth()) {
 			throw new AuthenticationException(ErrorCode.EMAIL_ALREADY_ACTIVATE);
 		}
 
 		member.setStatus(MemberStatus.ING);
-		member.setEmailAuthYn(true);
+		member.setEmailAuth(true);
 		member.setEmailAuthDt(LocalDateTime.now());
-		memberRepository.save(member);
-
-		return new ServiceResult(true, "이메일 인증이 정상적으로 이루어졌습니다.");
+		return MemberDto.Response.fromEntity(memberRepository.save(member));
 	}
 
 	public Member authenticate(MemberDto.SignIn singIn) {
@@ -108,33 +134,32 @@ public class MemberService implements UserDetailsService {
 		return member;
 	}
 
-	public ServiceResult withdraw(String email, String password) {
-		Member member = memberRepository.findByEmail(email)
-			.orElseThrow(() -> new AuthenticationException(ErrorCode.MEMBER_NOT_FOUND));
+	public MemberDto.Withdraw withdraw(Long id, MemberDto.SignIn request) {
+		Member member = getMember(id);
 
-		if (!passwordEncoder.matches(password, member.getPassword())) {
+		if (member.getEmail().contains("탈퇴")) {
+			throw new AuthenticationException(ErrorCode.MEMBER_WITHDRAW);
+		}
+
+		if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
 			throw new AuthenticationException(ErrorCode.PASSWORD_NOT_MATCH);
 		}
 
 		member.setName("사용자 정보가 없습니다.");
 		member.setPhone("");
 		member.setPassword("");
+		member.setNickname("");
 		member.setRegDt(null);
-		member.setUpdatedAt(null);
-		member.setEmailAuthYn(false);
+		member.setEmailAuth(false);
 		member.setEmailAuthDt(null);
 		member.setEmailAuthKey("");
 		member.setStatus(MemberStatus.WITHDRAW);
-		/** to-do 비밀번호 찾기
-		member.setResetPasswordKey("");
-		member.setResetPasswordLimitDt(null);
-		 **/
 		member.setZipcode("");
 		member.setAddress1("");
 		member.setAddress2("");
-		memberRepository.save(member);
+		member.setWallet(null);
 
-		return new ServiceResult(true, "탈퇴되었습니다.");
+		return MemberDto.Withdraw.fromEntity(memberRepository.save(member));
 	}
 
 	@Override

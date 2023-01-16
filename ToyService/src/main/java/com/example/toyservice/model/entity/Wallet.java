@@ -1,10 +1,8 @@
 package com.example.toyservice.model.entity;
 
-import javax.persistence.Column;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import lombok.AllArgsConstructor;
@@ -22,7 +20,8 @@ import lombok.ToString;
 @ToString
 @Entity
 public class Wallet extends BaseEntity {
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
+	@JsonIgnore // 응답시, 순환참조 방지
 	@JoinColumn(name = "member_id")
 	private Member member;
 	private Long balance;

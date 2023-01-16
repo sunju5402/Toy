@@ -31,7 +31,6 @@ public class TokenProvider {
 	/**
 	 * 토큰 생성(발급)
 	 */
-//	String
 	public String generateToken(String email, List<GrantedAuthority> roles) {
 		Claims claims = Jwts.claims().setSubject(email);
 		claims.put(KEY_ROLES, roles);
