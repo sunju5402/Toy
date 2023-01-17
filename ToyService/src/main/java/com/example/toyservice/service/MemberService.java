@@ -159,7 +159,8 @@ public class MemberService implements UserDetailsService {
 		member.setAddress1("");
 		member.setAddress2("");
 		member.setWallet(null);
-		// TODO sell_post 삭제 구현
+		member.getSellPosts().clear();
+		member.getSellPosts().stream().map(x -> null);
 
 		return MemberDto.Withdraw.fromEntity(memberRepository.save(member));
 	}

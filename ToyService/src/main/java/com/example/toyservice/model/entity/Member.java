@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -51,7 +52,8 @@ public class Member extends BaseEntity {
 	@JoinColumn(name = "wallet_id")
 	private Wallet wallet;
 
-	@OneToMany(mappedBy = "seller", fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToMany(mappedBy = "seller", cascade = CascadeType.ALL,
+		fetch = FetchType.LAZY, orphanRemoval = true)
 	@JsonIgnore
 	private List<SellPost> sellPosts = new ArrayList<>();
 }
