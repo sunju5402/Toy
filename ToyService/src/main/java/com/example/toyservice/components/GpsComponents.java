@@ -79,8 +79,8 @@ public class GpsComponents {
 		String zoneNo = "";
 		String dong = "";
 		for (int i = 0; i < size; i++) {
-			zoneNo = kakaoApi.getDocuments().get(i).getRoad_address().getZone_no();
-			dong = kakaoApi.getDocuments().get(i).getAddress().getRegion_3depth_name();
+			zoneNo = kakaoApi.getDocuments().get(i).getRoadAddress().getZoneNo();
+			dong = kakaoApi.getDocuments().get(i).getAddress().getRegion3DepthName();
 			if (!zoneNo.equals("") && zoneNo != null) {
 				existZoneNo = true;
 			}
