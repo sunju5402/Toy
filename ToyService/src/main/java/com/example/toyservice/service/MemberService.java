@@ -9,7 +9,6 @@ import com.example.toyservice.model.constants.Authority;
 import com.example.toyservice.model.constants.ErrorCode;
 import com.example.toyservice.model.constants.MemberStatus;
 import com.example.toyservice.model.entity.Member;
-import com.example.toyservice.model.entity.SellPost;
 import com.example.toyservice.repository.MemberRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,12 +43,10 @@ public class MemberService implements UserDetailsService {
 		boolean existsByEmail = memberRepository.existsByEmail(member.getEmail());
 		if (existsByEmail) {
 			// 탈퇴한 회원인지 확인.
-			if (!memberRepository.findByEmail(member.getEmail()).get().getNickname().equals("")) {
+			if (memberRepository.findByEmailAndStatusNot(member.getEmail(),
+				MemberStatus.WITHDRAW).isPresent()) {
 				throw new AuthenticationException(ErrorCode.MEMBER_ALREADY_EXIST);
 			}
-			// 로그인시 탈퇴회원과 구분하기 위해 email 수정.
-			memberRepository.findByEmail(member.getEmail()).
-				get().setEmail("탈퇴" + member.getEmail());
 			member.setRejoin(true);
 		}
 
@@ -90,6 +87,10 @@ public class MemberService implements UserDetailsService {
 	public RevisionMember.Response revise(Long memberId, RevisionMember.Request revisionMember) {
 		Member member = getMember(memberId);
 
+		if (member.getStatus() == MemberStatus.WITHDRAW) {
+			throw new AuthenticationException(ErrorCode.MEMBER_WITHDRAW);
+		}
+
 		boolean existsByNickname = memberRepository.existsByNickname(revisionMember.getNickname());
 		if (existsByNickname) {
 			throw new AuthenticationException(ErrorCode.NICKNAME_ALREADY_EXIST);
@@ -117,15 +118,12 @@ public class MemberService implements UserDetailsService {
 	}
 
 	public Member authenticate(MemberDto.SignIn singIn) {
-		Member member = memberRepository.findByEmail(singIn.getEmail())
-			.orElseThrow(() -> new AuthenticationException(ErrorCode.EMAIL_NOT_FOUND));
+		Member member = memberRepository.findByEmailAndStatusNot(singIn.getEmail(),
+				MemberStatus.WITHDRAW)
+			.orElseThrow(() -> new AuthenticationException(ErrorCode.EMAIL_NOT_VALID));
 
 		if (MemberStatus.REQ.equals(member.getStatus())) {
 			throw new AuthenticationException(ErrorCode.EMAIL_NOT_ACTIVATE);
-		}
-
-		if (MemberStatus.WITHDRAW.equals(member.getStatus())) {
-			throw new AuthenticationException(ErrorCode.MEMBER_WITHDRAW);
 		}
 
 		if (!passwordEncoder.matches(singIn.getPassword(), member.getPassword())) {
@@ -138,7 +136,7 @@ public class MemberService implements UserDetailsService {
 	public MemberDto.Withdraw withdraw(Long id, MemberDto.SignIn request) {
 		Member member = getMember(id);
 
-		if (member.getEmail().contains("탈퇴")) {
+		if (member.getStatus() == MemberStatus.WITHDRAW) {
 			throw new AuthenticationException(ErrorCode.MEMBER_WITHDRAW);
 		}
 
