@@ -23,7 +23,8 @@ public enum ErrorCode {
 	ADDRESS_NOT_MATCH("현재 위치와 다른 주소입니다."),
 	API_REQUEST_FAIL("api 요청 에러"),
 	NOT_EXIST_ADDRESS("주소가 존재하지 않습니다."),
-	NOT_EXIST_POST("해당 글이 존재하지 않습니다.")
+	NOT_EXIST_POST("해당 글이 존재하지 않습니다."),
+	NOT_MATCH_SELLER("회원정보가 일치하지 않습니다.")
 	;
 
 	private final String description;

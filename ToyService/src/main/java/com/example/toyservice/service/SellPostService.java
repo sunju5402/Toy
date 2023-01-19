@@ -14,6 +14,7 @@ import com.example.toyservice.repository.SellPostRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @RequiredArgsConstructor
 @Service
@@ -33,26 +34,33 @@ public class SellPostService {
 	}
 
 	public List<SellPostInfo> getSellPosts(Long memberId) {
-		List<SellPost> sellPosts = sellPostRepository.findAllBySellerId(memberId)
-			.orElseThrow(() -> new AuthenticationException(ErrorCode.MEMBER_NOT_FOUND));
+		List<SellPost> sellPosts = sellPostRepository.findAllBySellerId(memberId);
+
+		if (CollectionUtils.isEmpty(sellPosts)) {
+			throw new AuthenticationException(ErrorCode.NOT_EXIST_POST);
+
+		}
+		validateSeller(sellPosts.get(0), memberId);
+
 		return SellPostInfo.of(sellPosts);
 	}
 
 	public SellPostInfo getSellPost(Long memberId, Long postId) {
-		authenticate(memberId);
+		SellPost sellPost = sellPostRepository.findById(postId).orElseThrow(
+			() -> new AuthenticationException(ErrorCode.NOT_EXIST_POST));
 
-		return SellPostInfo.fromEntity(
-			sellPostRepository.findById(postId).orElseThrow(
-				() -> new AuthenticationException(ErrorCode.NOT_EXIST_POST)
-		));
+		validateSeller(sellPost, memberId);
+
+		return SellPostInfo.fromEntity(sellPost);
 	}
 
 	public SellPostDto.Response reviseSellPost(Long memberId, Long postId,
 		SellPostDto.Request request) {
-		authenticate(memberId);
-
 		SellPost sellPost = sellPostRepository.findById(postId)
 			.orElseThrow( () -> new AuthenticationException(ErrorCode.NOT_EXIST_POST));
+
+		validateSeller(sellPost, memberId);
+
 		sellPost.setTitle(request.getTitle());
 		sellPost.setToyName(request.getToyName());
 		sellPost.setImage(request.getImage());
@@ -63,26 +71,21 @@ public class SellPostService {
 	}
 
 	public SellPostInfo stop(Long memberId, Long postId) {
-		authenticate(memberId);
-
 		SellPost sellPost = sellPostRepository.findById(postId)
 			.orElseThrow( () -> new AuthenticationException(ErrorCode.NOT_EXIST_POST));
 
-		sellPost.setTitle(null);
-		sellPost.setToyName(null);
-		sellPost.setPrice(0);
-		sellPost.setImage(null);
-		sellPost.setContent(null);
+		validateSeller(sellPost, memberId);
+
 		sellPost.setStatus(SellStatus.SELL_STOP);
 
 		return SellPostInfo.fromEntity(sellPostRepository.save(sellPost));
 	}
 
-	public void authenticate(Long memberId) {
-		if (!sellPostRepository.existsBySellerId(memberId)) {
-			throw new AuthenticationException(ErrorCode.MEMBER_NOT_FOUND);
+	public void validateSeller(SellPost sellPost, Long memberId) {
+		if (sellPost.getSeller().getId() != memberId) {
+			throw new AuthenticationException(ErrorCode.NOT_MATCH_SELLER);
 		}
-		if (memberRepository.findById(memberId).get().getStatus() == MemberStatus.WITHDRAW) {
+		if (sellPost.getSeller().getStatus() == MemberStatus.WITHDRAW) {
 			throw new AuthenticationException(ErrorCode.MEMBER_WITHDRAW);
 		}
 	}
