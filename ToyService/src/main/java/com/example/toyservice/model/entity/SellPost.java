@@ -22,15 +22,15 @@ import lombok.ToString;
 @Getter
 @ToString
 @Entity
-public class SellPost extends BaseEntity{
+public class SellPost extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JsonIgnore
 	@JoinColumn(name = "seller_id")
 	private Member seller;
 
 	private String title;
-	private String name;
-	private int price;
+	private String toyName;
+	private long price;
 	private String image;
 	private String content;
 

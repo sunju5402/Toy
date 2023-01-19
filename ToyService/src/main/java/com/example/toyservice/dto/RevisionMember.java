@@ -20,7 +20,7 @@ public class RevisionMember {
 			message = "닉네임은 특수문자를 제외한 3~10자로 입력해주세요.")
 		private String nickname;
 
-		@NotBlank@NotBlank(message = "필수 입력입니다.")
+		@NotBlank(message = "필수 입력입니다.")
 		@Pattern(regexp = "(?=.*[0-9])(?=.*[a-z|A-Z])(?=.*\\W)(?=\\S+$).{8,16}",
 			message = "비밀번호는 8~16자이고, 적어도 영문 대 or 소문자, 숫자, 특수문자를 한 개 이상 입력하세요.")
 		private String password;
