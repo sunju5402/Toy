@@ -1,5 +1,6 @@
 package com.example.toyservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,8 @@ public class KakaoApi {
 	@AllArgsConstructor
 	@NoArgsConstructor
 	public static class Meta {
-		private long total_count;
+		@JsonProperty("total_count")
+		private long totalCount;
 	}
 
 	@Setter
@@ -27,7 +29,8 @@ public class KakaoApi {
 	@AllArgsConstructor
 	@NoArgsConstructor
 	public static class Documents {
-		private RoadAddress road_address;
+		@JsonProperty("road_address")
+		private RoadAddress roadAddress;
 		private Address address;
 	}
 
@@ -36,16 +39,26 @@ public class KakaoApi {
 	@AllArgsConstructor
 	@NoArgsConstructor
 	public static class RoadAddress {
-		private String address_name;
-		private String region_1depth_name;
-		private String region_2depth_name;
-		private String region_3depth_name;
-		private String road_name;
-		private String underground_yn;
-		private String main_building_no;
-		private String sub_building_no;
-		private String building_name;
-		private String zone_no;
+		@JsonProperty("address_name")
+		private String addressName;
+		@JsonProperty("region_1depth_name")
+		private String region1DepthName;
+		@JsonProperty("region_2depth_name")
+		private String region2DepthName;
+		@JsonProperty("region_3depth_name")
+		private String region3DepthName;
+		@JsonProperty("road_name")
+		private String roadName;
+		@JsonProperty("underground_yn")
+		private String undergroundYn;
+		@JsonProperty("main_building_no")
+		private String mainBuildingNo;
+		@JsonProperty("sub_building_no")
+		private String subBuildingNo;
+		@JsonProperty("building_name")
+		private String buildingName;
+		@JsonProperty("zone_no")
+		private String zoneNo;
 	}
 
 	@Setter
@@ -53,13 +66,21 @@ public class KakaoApi {
 	@AllArgsConstructor
 	@NoArgsConstructor
 	public static class Address {
-		private String address_name;
-		private String region_1depth_name;
-		private String region_2depth_name;
-		private String region_3depth_name;
-		private String mountain_yn;
-		private String main_address_no;
-		private String sub_address_no;
-		private String zip_code;
+		@JsonProperty("address_name")
+		private String addressName;
+		@JsonProperty("region_1depth_name")
+		private String region1DepthName;
+		@JsonProperty("region_2depth_name")
+		private String region2DepthName;
+		@JsonProperty("region_3depth_name")
+		private String region3DepthName;
+		@JsonProperty("mountain_yn")
+		private String mountainYn;
+		@JsonProperty("main_address_no")
+		private String mainAddressNo;
+		@JsonProperty("sub_address_no")
+		private String subAddressNo;
+		@JsonProperty("zip_code")
+		private String zipCode;
 	}
 }

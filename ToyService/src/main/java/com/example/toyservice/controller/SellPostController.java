@@ -22,7 +22,7 @@ public class SellPostController {
 	private final SellPostService sellPostService;
 
 	@GetMapping("/members/{memberId}/posts/{postId}")
-	public ResponseEntity<ResponseResult> getSellPosts(
+	public ResponseEntity<ResponseResult> getSellPost(
 		@PathVariable Long memberId,
 		@PathVariable Long postId) {
 		return ResponseEntity.ok(

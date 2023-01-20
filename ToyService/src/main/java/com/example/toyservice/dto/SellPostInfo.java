@@ -4,6 +4,7 @@ import com.example.toyservice.model.constants.SellStatus;
 import com.example.toyservice.model.entity.SellPost;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,14 +27,12 @@ public class SellPostInfo {
 	private SellStatus status;
 
 	public static List<SellPostInfo> of(List<SellPost> sellPosts) {
-		if (sellPosts != null) {
-			List<SellPostInfo> postList = new ArrayList<>();
-			for (SellPost x : sellPosts) {
-				postList.add(fromEntity(x));
-			}
-			return postList;
+		if (sellPosts == null) {
+			return null;
 		}
-		return null;
+		return sellPosts.stream()
+			.map(SellPostInfo::fromEntity)
+			.collect(Collectors.toList());
 	}
 
 	public static SellPostInfo fromEntity(SellPost sellPost) {
