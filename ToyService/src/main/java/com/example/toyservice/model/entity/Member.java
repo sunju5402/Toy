@@ -56,4 +56,9 @@ public class Member extends BaseEntity {
 		fetch = FetchType.LAZY, orphanRemoval = true)
 	@JsonIgnore
 	private List<SellPost> sellPosts = new ArrayList<>();
+
+	@OneToMany(mappedBy = "lender", cascade = CascadeType.ALL,
+		fetch = FetchType.LAZY, orphanRemoval = true)
+	@JsonIgnore
+	private List<LendPost> lendPosts = new ArrayList<>();
 }

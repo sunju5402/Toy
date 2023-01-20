@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.util.CollectionUtils;
 
 @Getter
 @Setter
@@ -27,7 +28,7 @@ public class SellPostInfo {
 	private SellStatus status;
 
 	public static List<SellPostInfo> of(List<SellPost> sellPosts) {
-		if (sellPosts == null) {
+		if (CollectionUtils.isEmpty(sellPosts)) {
 			return null;
 		}
 		return sellPosts.stream()
