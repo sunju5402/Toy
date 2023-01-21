@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -79,6 +80,7 @@ public class MemberService implements UserDetailsService {
 		return member.toEntity();
 	}
 
+	@Cacheable(key = "#id", value = "member")
 	public Member getMember(Long id) {
 		return memberRepository.findById(id)
 			.orElseThrow(() -> new AuthenticationException(ErrorCode.MEMBER_NOT_FOUND));
