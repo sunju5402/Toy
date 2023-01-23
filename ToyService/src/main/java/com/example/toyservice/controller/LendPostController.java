@@ -8,6 +8,8 @@ import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,6 +59,17 @@ public class LendPostController {
 		return ResponseEntity.ok(
 			new ResponseResult(lendPostService.reviseLendPost(memberId, postId, request)
 				, "대여게시글이 수정되었습니다.")
+		);
+	}
+
+	@PutMapping("/lend-posts/{id}/return")
+	public ResponseEntity<ResponseResult> returnToy(
+		@PathVariable Long id,
+		@AuthenticationPrincipal User user
+	) {
+		return ResponseEntity.ok(
+			new ResponseResult(lendPostService.returnToy(id, user.getUsername())
+				, "반납이 완료되었습니다.")
 		);
 	}
 
