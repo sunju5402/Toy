@@ -2,6 +2,7 @@ package com.example.toyservice.service;
 
 import com.example.toyservice.dto.TransactionInfo;
 import com.example.toyservice.exception.AuthenticationException;
+import com.example.toyservice.model.constants.BorrowStatus;
 import com.example.toyservice.model.constants.ErrorCode;
 import com.example.toyservice.model.constants.LendStatus;
 import com.example.toyservice.model.constants.MemberStatus;
@@ -17,7 +18,6 @@ import com.example.toyservice.repository.SellPostRepository;
 import com.example.toyservice.repository.TransactionRepository;
 import com.example.toyservice.repository.WalletRepository;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -67,6 +67,7 @@ public class WalletService {
 			throw new AuthenticationException(ErrorCode.NOT_TRADE_OWN_TOYS);
 		}
 
+		// 사는 사람 wallet
 		Wallet wallet = memberRepository.getByEmailAndStatus(email, MemberStatus.ING).getWallet();
 
 		long balance = wallet.getBalance() - sellPost.getPrice();
@@ -76,16 +77,28 @@ public class WalletService {
 		wallet.setBalance(balance);
 		walletRepository.save(wallet);
 
+		// 파는 사람 wallet
+		wallet = memberRepository.getReferenceById(sellPost.getSeller().getId()).getWallet();
+		wallet.setBalance(sellPost.getPrice());
+		walletRepository.save(wallet);
+
+		Transaction sellerTransaction = Transaction.builder()
+			.wallet(wallet)
+			.balance(sellPost.getPrice())
+			.transactionAt(LocalDateTime.now())
+			.build();
+		transactionRepository.save(sellerTransaction);
+
 		sellPost.setStatus(SellStatus.SELL_COMPLETE);
 		sellPost.setPurchaser(wallet.getMember());
 		sellPostRepository.save(sellPost);
 
-		Transaction transaction = Transaction.builder()
+		Transaction purchaserTransaction = Transaction.builder()
 			.wallet(wallet)
 			.balance(-sellPost.getPrice())
 			.transactionAt(LocalDateTime.now())
 			.build();
-		return TransactionInfo.fromEntity(transactionRepository.save(transaction));
+		return TransactionInfo.fromEntity(transactionRepository.save(purchaserTransaction));
 	}
 
 	public TransactionInfo borrow(Long lendPostId, String email) {
@@ -101,6 +114,7 @@ public class WalletService {
 			throw new AuthenticationException(ErrorCode.NOT_TRADE_OWN_TOYS);
 		}
 
+		// borrower wallet
 		Wallet wallet = memberRepository.getByEmailAndStatus(email, MemberStatus.ING).getWallet();
 
 		long fee = 5000;
@@ -111,16 +125,29 @@ public class WalletService {
 		wallet.setBalance(balance);
 		walletRepository.save(wallet);
 
+		// lender wallet
+		wallet = memberRepository.getReferenceById(lendPost.getLender().getId()).getWallet();
+		wallet.setBalance(fee);
+		walletRepository.save(wallet);
+
+		Transaction lenderTransaction = Transaction.builder()
+			.wallet(wallet)
+			.balance(fee)
+			.transactionAt(LocalDateTime.now())
+			.build();
+		transactionRepository.save(lenderTransaction);
+
 		lendPost.setStatus(LendStatus.LEND_COMPLETE);
+		lendPost.setBorrowStatus(BorrowStatus.BORROW_ING);
 		lendPost.setBorrower(wallet.getMember());
 		lendPost.setBorrowAt(LocalDateTime.now());
 		lendPostRepository.save(lendPost);
 
-		Transaction transaction = Transaction.builder()
+		Transaction borrowerTransaction = Transaction.builder()
 			.wallet(wallet)
 			.balance(-fee)
 			.transactionAt(LocalDateTime.now())
 			.build();
-		return TransactionInfo.fromEntity(transactionRepository.save(transaction));
+		return TransactionInfo.fromEntity(transactionRepository.save(borrowerTransaction));
 	}
 }
