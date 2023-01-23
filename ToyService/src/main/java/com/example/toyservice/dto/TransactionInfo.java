@@ -2,14 +2,11 @@ package com.example.toyservice.dto;
 
 import com.example.toyservice.model.entity.Transaction;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.util.CollectionUtils;
 
 @Getter
 @Setter
@@ -25,14 +22,5 @@ public class TransactionInfo {
 			.balance(transaction.getBalance())
 			.transactionAt(transaction.getTransactionAt())
 			.build();
-	}
-
-	public static List<TransactionInfo> of(List<Transaction> transactions) {
-		if (CollectionUtils.isEmpty(transactions)) {
-			return null;
-		}
-		return transactions.stream()
-			.map(TransactionInfo::fromEntity)
-			.collect(Collectors.toList());
 	}
 }
