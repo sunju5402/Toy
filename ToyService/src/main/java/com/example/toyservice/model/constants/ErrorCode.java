@@ -24,7 +24,11 @@ public enum ErrorCode {
 	API_REQUEST_FAIL("api 요청 에러"),
 	NOT_EXIST_ADDRESS("주소가 존재하지 않습니다."),
 	NOT_EXIST_POST("해당 글이 존재하지 않습니다."),
-	NOT_MATCH_MEMBER("회원정보가 일치하지 않습니다.")
+	NOT_SELL_POST("거래 중인 판매글이 아닙니다."),
+	NOT_LEND_POST("거래 중인 대여글이 아닙니다."),
+	NOT_MATCH_MEMBER("회원정보가 일치하지 않습니다."),
+	NOT_TRADE_OWN_TOYS("본인 소유의 장난감은 본인이 거래할 수 없습니다."),
+	INSUFFICIENT_BALANCE("계좌 잔고가 부족합니다. 충전해주세요.")
 	;
 
 	private final String description;

@@ -1,11 +1,9 @@
 package com.example.toyservice.model.entity;
 
 import com.example.toyservice.model.constants.MemberStatus;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import java.time.LocalDateTime;
@@ -67,8 +65,18 @@ public class Member extends BaseEntity {
 	@JsonIgnore
 	private List<SellPost> sellPosts = new ArrayList<>();
 
+	@OneToMany(mappedBy = "purchaser", cascade = CascadeType.ALL,
+		fetch = FetchType.LAZY, orphanRemoval = true)
+	@JsonIgnore
+	private List<SellPost> purchasePosts = new ArrayList<>();
+
 	@OneToMany(mappedBy = "lender", cascade = CascadeType.ALL,
 		fetch = FetchType.LAZY, orphanRemoval = true)
 	@JsonIgnore
 	private List<LendPost> lendPosts = new ArrayList<>();
+
+	@OneToMany(mappedBy = "borrower", cascade = CascadeType.ALL,
+		fetch = FetchType.LAZY, orphanRemoval = true)
+	@JsonIgnore
+	private List<LendPost> borrowPosts = new ArrayList<>();
 }

@@ -1,14 +1,15 @@
 package com.example.toyservice.model.entity;
 
 import com.example.toyservice.model.constants.LendStatus;
-import com.example.toyservice.model.constants.SellStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,11 +30,17 @@ public class LendPost extends BaseEntity {
 	@JoinColumn(name = "lender_id")
 	private Member lender;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JsonIgnore
+	@JoinColumn(name = "borrower_id")
+	private Member borrower;
+
 	private String title;
 	private String toyName;
 	private String image;
 	private String content;
 	private int lendPeriod;
+	private LocalDateTime borrowAt;
 
 	@Enumerated(EnumType.STRING)
 	private LendStatus status;
