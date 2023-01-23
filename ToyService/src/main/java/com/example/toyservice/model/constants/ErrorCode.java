@@ -30,7 +30,8 @@ public enum ErrorCode {
 	NOT_MATCH_MEMBER("회원정보가 일치하지 않습니다."),
 	NOT_TRADE_OWN_TOYS("본인 소유의 장난감은 본인이 거래할 수 없습니다."),
 	INSUFFICIENT_BALANCE("계좌 잔고가 부족합니다. 충전해주세요."),
-	NOT_EXIST_BORROW_TOY("빌린 장난감이 존재하지 않습니다.")
+	NOT_EXIST_BORROW_TOY("빌린 장난감이 존재하지 않습니다."),
+	NOT_EXIST_Transaction("거래 내역이 존재하지 않습니다.")
 	;
 
 	private final String description;
