@@ -4,19 +4,33 @@ import com.example.toyservice.model.ResponseResult;
 import com.example.toyservice.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
 public class TransactionController {
-//	private final TransactionService transactionService;
-//
-//	@PostMapping("/sell-posts/{id}/purchase")
-//	public ResponseEntity<ResponseResult> purchase(
-//		@PathVariable Long id
-//	) {
-//
-//	}
+	private final TransactionService transactionService;
+
+	@GetMapping("/members/{memberId}/transactions/{id}")
+	public ResponseEntity<ResponseResult> getTransaction(
+		@PathVariable Long memberId,
+		@PathVariable Long id
+	) {
+		return ResponseEntity.ok(new ResponseResult(
+			transactionService.getTransaction(memberId, id),
+			"거래 조회를 완료하였습니다."
+		));
+	}
+
+	@GetMapping("/members/{id}/transactions}")
+	public ResponseEntity<ResponseResult> getTransactions(
+		@PathVariable Long id
+	) {
+		return ResponseEntity.ok(new ResponseResult(
+			transactionService.getTransactions(id),
+			"거래 조회를 완료하였습니다."
+		));
+	}
 }
