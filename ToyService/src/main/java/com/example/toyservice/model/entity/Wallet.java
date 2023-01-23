@@ -1,9 +1,13 @@
 package com.example.toyservice.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,4 +29,9 @@ public class Wallet extends BaseEntity {
 	@JoinColumn(name = "member_id")
 	private Member member;
 	private Long balance;
+
+	@OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL,
+		fetch = FetchType.LAZY, orphanRemoval = true)
+	@JsonIgnore
+	private List<Transaction> transactions = new ArrayList<>();
 }

@@ -8,6 +8,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,6 +28,11 @@ public class SellPost extends BaseEntity {
 	@JsonIgnore
 	@JoinColumn(name = "seller_id")
 	private Member seller;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JsonIgnore
+	@JoinColumn(name = "purchaser_id")
+	private Member purchaser;
 
 	private String title;
 	private String toyName;

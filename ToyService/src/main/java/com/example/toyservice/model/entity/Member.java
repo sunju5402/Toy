@@ -2,6 +2,10 @@ package com.example.toyservice.model.entity;
 
 import com.example.toyservice.model.constants.MemberStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +40,14 @@ public class Member extends BaseEntity {
 	private String address1; // 지명주소
 	private String address2; // 상세주소
 	private String phone;
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime regDt;
 	private boolean admin;
 
 	private boolean emailAuth;
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	private LocalDateTime emailAuthDt;
 	private String emailAuthKey;
 
@@ -57,8 +65,18 @@ public class Member extends BaseEntity {
 	@JsonIgnore
 	private List<SellPost> sellPosts = new ArrayList<>();
 
+	@OneToMany(mappedBy = "purchaser", cascade = CascadeType.ALL,
+		fetch = FetchType.LAZY, orphanRemoval = true)
+	@JsonIgnore
+	private List<SellPost> purchasePosts = new ArrayList<>();
+
 	@OneToMany(mappedBy = "lender", cascade = CascadeType.ALL,
 		fetch = FetchType.LAZY, orphanRemoval = true)
 	@JsonIgnore
 	private List<LendPost> lendPosts = new ArrayList<>();
+
+	@OneToMany(mappedBy = "borrower", cascade = CascadeType.ALL,
+		fetch = FetchType.LAZY, orphanRemoval = true)
+	@JsonIgnore
+	private List<LendPost> borrowPosts = new ArrayList<>();
 }
