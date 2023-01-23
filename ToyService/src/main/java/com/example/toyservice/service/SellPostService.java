@@ -83,7 +83,7 @@ public class SellPostService {
 
 	public void validateSeller(SellPost sellPost, Long memberId) {
 		if (sellPost.getSeller().getId() != memberId) {
-			throw new AuthenticationException(ErrorCode.NOT_MATCH_SELLER);
+			throw new AuthenticationException(ErrorCode.NOT_MATCH_MEMBER);
 		}
 		if (sellPost.getSeller().getStatus() == MemberStatus.WITHDRAW) {
 			throw new AuthenticationException(ErrorCode.MEMBER_WITHDRAW);

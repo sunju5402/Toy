@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SellPostController {
 	private final SellPostService sellPostService;
 
-	@GetMapping("/members/{memberId}/posts/{postId}")
+	@GetMapping("/members/{memberId}/sell-posts/{postId}")
 	public ResponseEntity<ResponseResult> getSellPost(
 		@PathVariable Long memberId,
 		@PathVariable Long postId) {
@@ -30,14 +30,14 @@ public class SellPostController {
 				"판매글을 성공적으로 조회하였습니다."));
 	}
 
-	@GetMapping("/members/{id}/posts")
+	@GetMapping("/members/{id}/sell-posts")
 	public ResponseEntity<ResponseResult> getSellPosts(@PathVariable Long id) {
 		return ResponseEntity.ok(
 			new ResponseResult(sellPostService.getSellPosts(id),
 				"판매글을 성공적으로 조회하였습니다."));
 	}
 
-	@PostMapping("/members/{id}/posts")
+	@PostMapping("/members/{id}/sell-posts")
 	public ResponseEntity<ResponseResult> sellPost(
 		@PathVariable Long id,
 		@Valid @RequestBody SellPostDto.Request request) {
@@ -47,7 +47,7 @@ public class SellPostController {
 		);
 	}
 
-	@PutMapping("/members/{memberId}/posts/{postId}")
+	@PutMapping("/members/{memberId}/sell-posts/{postId}")
 	public ResponseEntity<ResponseResult> reviseSellPost(
 		@PathVariable Long memberId,
 		@PathVariable Long postId,
@@ -59,7 +59,7 @@ public class SellPostController {
 		);
 	}
 
-	@DeleteMapping("/members/{memberId}/posts/{postId}")
+	@DeleteMapping("/members/{memberId}/sell-posts/{postId}")
 	public ResponseEntity<ResponseResult> stopSellPost(
 		@PathVariable Long memberId, @PathVariable Long postId
 	) {

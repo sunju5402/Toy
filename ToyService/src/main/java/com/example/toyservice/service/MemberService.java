@@ -159,6 +159,8 @@ public class MemberService implements UserDetailsService {
 		member.setWallet(null);
 		member.getSellPosts().clear();
 		member.getSellPosts().stream().map(x -> null);
+		member.getLendPosts().clear();
+		member.getLendPosts().stream().map(x -> null);
 
 		return MemberDto.Withdraw.fromEntity(memberRepository.save(member));
 	}
