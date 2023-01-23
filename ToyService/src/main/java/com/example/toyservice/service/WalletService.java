@@ -70,9 +70,6 @@ public class WalletService {
 		Wallet wallet = memberRepository.getByEmailAndStatus(email, MemberStatus.ING).getWallet();
 
 		long balance = wallet.getBalance() - sellPost.getPrice();
-		log.info("wallet balance : " + wallet.getBalance());
-		log.info("sellPost balance : " + sellPost.getPrice());
-		log.info("balance : " + balance);
 		if (balance < 0) {
 			throw new AuthenticationException(ErrorCode.INSUFFICIENT_BALANCE);
 		}
