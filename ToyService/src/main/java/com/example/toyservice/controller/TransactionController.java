@@ -3,6 +3,8 @@ package com.example.toyservice.controller;
 import com.example.toyservice.model.ResponseResult;
 import com.example.toyservice.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,10 +30,11 @@ public class TransactionController {
 
 	@GetMapping("/members/{id}/transactions")
 	public ResponseEntity<ResponseResult> getTransactions(
-		@PathVariable Long id
+		@PathVariable Long id,
+		@PageableDefault(size = 5) final Pageable pageable
 	) {
 		return ResponseEntity.ok(new ResponseResult(
-			transactionService.getTransactions(id),
+			transactionService.getTransactions(id, pageable),
 			"거래 조회를 완료하였습니다."
 		));
 	}
