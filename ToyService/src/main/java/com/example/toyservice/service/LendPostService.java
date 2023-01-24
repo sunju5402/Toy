@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,8 +65,8 @@ public class LendPostService {
 		}
 	}
 
-	public List<LendPostInfo> getLendPosts(Long memberId) {
-		List<LendPost> lendPosts = lendPostRepository.findAllByLenderId(memberId);
+	public List<LendPostInfo> getLendPosts(Long memberId, Pageable pageable) {
+		List<LendPost> lendPosts = lendPostRepository.findAllByLenderId(memberId, pageable);
 
 		if (CollectionUtils.isEmpty(lendPosts)) {
 			throw new AuthenticationException(ErrorCode.NOT_EXIST_POST);
