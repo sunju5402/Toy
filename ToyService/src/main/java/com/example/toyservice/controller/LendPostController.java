@@ -6,6 +6,8 @@ import com.example.toyservice.model.ResponseResult;
 import com.example.toyservice.service.LendPostService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,14 +36,16 @@ public class LendPostController {
 	}
 
 	@GetMapping("/members/{id}/lend-posts")
-	public ResponseEntity<ResponseResult> getLendPosts(@PathVariable Long id) {
+	public ResponseEntity<ResponseResult> getLendPosts(
+		@PathVariable Long id,
+		@PageableDefault(size = 10) final Pageable pageable) {
 		return ResponseEntity.ok(
-			new ResponseResult(lendPostService.getLendPosts(id),
+			new ResponseResult(lendPostService.getLendPosts(id, pageable),
 				"대여글을 성공적으로 조회하였습니다."));
 	}
 
 	@PostMapping("/members/{id}/lend-posts")
-	public ResponseEntity<ResponseResult> lendPost(
+	public ResponseEntity<ResponseResult> addLendPost(
 		@PathVariable Long id,
 		@Valid @RequestBody LendPostDto.Request request) {
 		return ResponseEntity.ok(
