@@ -13,6 +13,7 @@ import com.example.toyservice.repository.MemberRepository;
 import com.example.toyservice.repository.SellPostRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -33,8 +34,8 @@ public class SellPostService {
 		return SellPostDto.Response.fromEntity(sellPostRepository.save(request.toEntity()));
 	}
 
-	public List<SellPostInfo> getSellPosts(Long memberId) {
-		List<SellPost> sellPosts = sellPostRepository.findAllBySellerId(memberId);
+	public List<SellPostInfo> getSellPosts(Long memberId, Pageable pageable) {
+		List<SellPost> sellPosts = sellPostRepository.findAllBySellerId(memberId, pageable);
 
 		if (CollectionUtils.isEmpty(sellPosts)) {
 			throw new AuthenticationException(ErrorCode.NOT_EXIST_POST);

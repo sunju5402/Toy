@@ -5,6 +5,8 @@ import com.example.toyservice.model.ResponseResult;
 import com.example.toyservice.service.SellPostService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,9 +33,11 @@ public class SellPostController {
 	}
 
 	@GetMapping("/members/{id}/sell-posts")
-	public ResponseEntity<ResponseResult> getSellPosts(@PathVariable Long id) {
+	public ResponseEntity<ResponseResult> getSellPosts(
+		@PathVariable Long id,
+		@PageableDefault(size = 10) final Pageable pageable) {
 		return ResponseEntity.ok(
-			new ResponseResult(sellPostService.getSellPosts(id),
+			new ResponseResult(sellPostService.getSellPosts(id, pageable),
 				"판매글을 성공적으로 조회하였습니다."));
 	}
 
