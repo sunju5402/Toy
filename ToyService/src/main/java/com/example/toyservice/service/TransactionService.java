@@ -10,7 +10,9 @@ import com.example.toyservice.repository.MemberRepository;
 import com.example.toyservice.repository.TransactionRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @RequiredArgsConstructor
 @Service
@@ -33,10 +35,14 @@ public class TransactionService {
 		return TransactionInfo.fromEntity(transaction);
 	}
 
-	public List<TransactionInfo> getTransactions(Long memberId) {
+	// page 정보까지 담고 싶으면 return type : Page
+	public List<TransactionInfo> getTransactions(Long memberId, Pageable pageable) {
 		Member member = getMember(memberId);
 		List<Transaction> transactions = transactionRepository.findAllByWalletId(
-			member.getWallet().getId());
+			member.getWallet().getId(), pageable);
+		if (CollectionUtils.isEmpty(transactions)) {
+			throw new AuthenticationException(ErrorCode.NOT_EXIST_TRANSACTION);
+		}
 
 		return TransactionInfo.of(transactions);
 	}

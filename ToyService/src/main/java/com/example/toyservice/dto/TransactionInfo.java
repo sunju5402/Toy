@@ -31,6 +31,7 @@ public class TransactionInfo {
 		if (CollectionUtils.isEmpty(transactions)) {
 			return null;
 		}
+		// page 정보까지 넘기고 싶으면 new PageImpl<>()
 		return transactions.stream()
 			.map(TransactionInfo::fromEntity)
 			.collect(Collectors.toList());
